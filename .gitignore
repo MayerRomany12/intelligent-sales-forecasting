@@ -1,0 +1,14 @@
+# Local MLflow tracking data
+mlflow.db
+mlruns/
+
+# Python cache files
+__pycache__/
+*.pyc
+
+# Jupyter notebook checkpoints
+.ipynb_checkpoints/
+
+# Operating system files
+.DS_Store
+Thumbs.db

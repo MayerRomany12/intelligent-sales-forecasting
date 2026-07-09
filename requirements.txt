@@ -12,3 +12,4 @@ jupyter
 kaggle
 statsmodels
 holidays
+xgboost

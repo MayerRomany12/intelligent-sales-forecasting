@@ -9,8 +9,8 @@ This repository contains the end-to-end Machine Learning pipeline for predicting
 3. **Machine Learning Model Development**: See `notebooks/03_model_development_and_optimization.ipynb`.
 4. **MLOps, Deployment, and Monitoring**:
    - `src/train.py` & `src/predict.py`: Model scripts tracking with MLflow.
-   - `api/app.py`: FastAPI backend to serve the model.
-   - `dashboard/app.py`: Streamlit dashboard for interactive prediction.
+   - `src/api/app.py`: FastAPI backend to serve the model.
+   - `src/dashboard/app.py`: Streamlit dashboard for interactive prediction.
 
 ## Setup Instructions
 
@@ -24,9 +24,10 @@ This repository contains the end-to-end Machine Learning pipeline for predicting
    ```
 3. Run the API (from root directory):
    ```bash
-   uvicorn api.app:app --reload
+   uvicorn src.api.app:app --reload
    ```
 4. Run the Dashboard:
    ```bash
-   streamlit run dashboard/app.py
+   streamlit run src/dashboard/app.py
    ```
+
