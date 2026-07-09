@@ -58,6 +58,7 @@ jobs:
     - name: Build React Client
       run: |
         cd frontend
+        chmod +x ./node_modules/.bin/vite
         VITE_API_URL=http://localhost:8000 npm run build
 
   docker-build:
