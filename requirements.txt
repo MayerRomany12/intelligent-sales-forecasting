@@ -13,3 +13,4 @@ kaggle
 statsmodels
 holidays
 xgboost
+plotly

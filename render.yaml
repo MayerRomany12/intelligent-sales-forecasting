@@ -1,0 +1,29 @@
+services:
+  # FastAPI Backend Web Service
+  - type: web
+    name: olist-sales-api
+    env: docker
+    dockerfilePath: src/api/Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    plan: free
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: MODEL_PATH
+        value: Models/best_xgboost_model.json
+      - key: CORS_ORIGINS
+        value: "*" # Change in production to match frontend URL
+
+  # Streamlit Dashboard Web Service
+  - type: web
+    name: olist-sales-dashboard
+    env: docker
+    dockerfilePath: src/dashboard/Dockerfile
+    dockerContext: .
+    plan: free
+    envVars:
+      - key: PORT
+        value: 8501
+      - key: API_URL
+        value: https://olist-sales-api.onrender.com # Replace with your deployed API URL

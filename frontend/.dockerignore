@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.git
+.github
+.gitignore
+Dockerfile
+docker-compose*
+README.md
+.env
+.env.local

@@ -1,0 +1,201 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.header {
+  margin-bottom: 2.5rem;
+}
+
+.title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(135deg, #00F2FE 0%, #4FACFE 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.subtitle {
+  color: #94A3B8;
+  font-size: 1.1rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.content-grid {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 2rem;
+  width: 100%;
+  text-align: left;
+}
+
+@media (max-width: 768px) {
+  .content-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Glassmorphism Cards */
+.card {
+  background: rgba(15, 20, 36, 0.6);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  padding: 1.75rem;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+}
+
+.card h2 {
+  font-family: 'Outfit', sans-serif;
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  font-size: 1.35rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: 0.5rem;
+}
+
+/* Forms */
+.form-group {
+  margin-bottom: 1.25rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #94A3B8;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.form-group input, .form-group select {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  color: #FFFFFF;
+  font-family: inherit;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+
+.form-group input:focus, .form-group select:focus {
+  outline: none;
+  border-color: #00F2FE;
+  box-shadow: 0 0 8px rgba(0, 242, 254, 0.25);
+}
+
+.btn-predict {
+  width: 100%;
+  padding: 0.85rem;
+  background: linear-gradient(135deg, #00F2FE 0%, #4FACFE 100%);
+  border: none;
+  border-radius: 8px;
+  color: #FFFFFF;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-predict:hover:not(:disabled) {
+  box-shadow: 0 0 15px rgba(0, 242, 254, 0.4);
+  transform: translateY(-2px);
+}
+
+.btn-predict:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Glowing prediction card */
+.glow-card {
+  background: linear-gradient(135deg, rgba(16, 24, 48, 0.85) 0%, rgba(24, 40, 72, 0.85) 100%);
+  border: 1px solid rgba(0, 242, 254, 0.4);
+  border-radius: 16px;
+  padding: 2rem;
+  text-align: center;
+  box-shadow: 0 10px 40px 0 rgba(0, 242, 254, 0.15), inset 0 0 15px rgba(0, 242, 254, 0.08);
+  margin-bottom: 2rem;
+  transition: all 0.3s ease;
+}
+
+.glow-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 15px 50px 0 rgba(0, 242, 254, 0.3), inset 0 0 20px rgba(0, 242, 254, 0.15);
+}
+
+.glow-title {
+  color: #94A3B8;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 0.5rem;
+}
+
+.glow-value {
+  color: #00F2FE;
+  font-size: 3rem;
+  font-weight: 700;
+  text-shadow: 0 0 15px rgba(0, 242, 254, 0.6);
+  margin: 0.5rem 0;
+}
+
+.glow-date {
+  color: #64748B;
+  font-size: 0.85rem;
+}
+
+/* Table styling */
+.forecast-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.5rem;
+}
+
+.forecast-table th, .forecast-table td {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.forecast-table th {
+  color: #94A3B8;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.forecast-table tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+.sales-cell {
+  color: #00F2FE;
+  font-weight: 600;
+}
+
+/* Utils */
+.error-box {
+  background-color: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #F87171;
+  padding: 0.75rem;
+  border-radius: 8px;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+}
+
+.placeholder-card {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+  background: rgba(15, 20, 36, 0.3);
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  color: #64748B;
+}

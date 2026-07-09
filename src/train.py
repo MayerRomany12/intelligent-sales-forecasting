@@ -56,7 +56,7 @@ def train_best_model(data_path, model_dir):
         # Log to MLflow
         mlflow.log_params(params)
         mlflow.log_metrics({"mae": mae, "rmse": rmse, "r2": r2})
-        mlflow.sklearn.log_model(model, "xgboost_model")
+        mlflow.sklearn.log_model(model, "xgboost_model", serialization_format="pickle")
         
         # Save model locally for easy API / dashboard loading
         os.makedirs(model_dir, exist_ok=True)

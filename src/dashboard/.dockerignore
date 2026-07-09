@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.git
+.github
+.gitignore
+.env
+.ipynb_checkpoints/
+notebooks/
+data/raw/
+*.log
+mlruns/
