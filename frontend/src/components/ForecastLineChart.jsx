@@ -81,6 +81,20 @@ export default function ForecastLineChart({ forecastData }) {
         {/* X axis line */}
         <line x1={paddingLeft} y1={paddingTop + chartHeight} x2={svgWidth - paddingRight} y2={paddingTop + chartHeight} className="chart-axis-line" />
 
+        {/* Tracker Crosshair */}
+        {activeTooltip && (
+          <line
+            x1={activeTooltip.x}
+            y1={paddingTop}
+            x2={activeTooltip.x}
+            y2={paddingTop + chartHeight}
+            stroke="rgba(0, 242, 254, 0.35)"
+            strokeDasharray="4 4"
+            strokeWidth="1.5"
+            style={{ pointerEvents: 'none' }}
+          />
+        )}
+
         {/* Area & Line */}
         {forecastData.length > 1 && <path d={areaPath} className="chart-area" />}
         <path d={linePath} className="chart-line" />

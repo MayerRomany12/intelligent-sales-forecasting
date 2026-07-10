@@ -8,7 +8,6 @@ export default function CumulativeAreaChart({ forecastData }) {
   const cumulativeData = useMemo(() => {
     if (!forecastData || forecastData.length === 0) return []
 
-    // Sort to avoid errors if API response dates are jumbled
     const sorted = [...forecastData].sort(
       (a, b) => parseLocalDate(a.date) - parseLocalDate(b.date)
     )
@@ -26,18 +25,18 @@ export default function CumulativeAreaChart({ forecastData }) {
 
   if (cumulativeData.length === 0) {
     return (
-      <div className="placeholder-card" style={{ minHeight: '200px' }}>
+      <div className="placeholder-card" style={{ minHeight: '300px' }}>
         <p>No forecast data available.</p>
       </div>
     )
   }
 
-  const svgWidth = 400
-  const svgHeight = 240
-  const paddingLeft = 60
-  const paddingRight = 20
-  const paddingTop = 25
-  const paddingBottom = 40
+  const svgWidth = 800
+  const svgHeight = 320
+  const paddingLeft = 70
+  const paddingRight = 40
+  const paddingTop = 40
+  const paddingBottom = 50
 
   const chartWidth = svgWidth - paddingLeft - paddingRight
   const chartHeight = svgHeight - paddingTop - paddingBottom
@@ -57,15 +56,15 @@ export default function CumulativeAreaChart({ forecastData }) {
     ? `${linePath} L ${points[points.length - 1].x} ${paddingTop + chartHeight} L ${points[0].x} ${paddingTop + chartHeight} Z`
     : ''
 
-  const gridValues = [0, yMax * 0.33, yMax * 0.66, yMax]
-  const labelInterval = cumulativeData.length > 20 ? 8 : cumulativeData.length > 10 ? 4 : 2
+  const gridValues = [0, yMax * 0.25, yMax * 0.5, yMax * 0.75, yMax]
+  const labelInterval = cumulativeData.length > 20 ? 6 : cumulativeData.length > 10 ? 3 : 1
 
   return (
-    <div className="chart-container-inner" style={{ position: 'relative', width: '100%' }}>
-      <svg viewBox={`0 0 ${svgWidth} ${svgHeight}`} className="svg-chart" style={{ width: '100%', height: '220px', overflow: 'visible' }}>
+    <div className="chart-container-inner" style={{ position: 'relative', width: '100%', flexGrow: 1 }}>
+      <svg viewBox={`0 0 ${svgWidth} ${svgHeight}`} className="svg-chart" style={{ width: '100%', height: '300px', overflow: 'visible' }}>
         <defs>
           <linearGradient id="cum-gradient" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#8b5cf6" stopOpacity="0.3" />
+            <stop offset="0%" stopColor="#8b5cf6" stopOpacity="0.4" />
             <stop offset="100%" stopColor="#4568dc" stopOpacity="0.0" />
           </linearGradient>
         </defs>
@@ -76,8 +75,8 @@ export default function CumulativeAreaChart({ forecastData }) {
           return (
             <g key={idx}>
               <line x1={paddingLeft} y1={y} x2={svgWidth - paddingRight} y2={y} className="chart-grid-line" />
-              <text x={paddingLeft - 8} y={y + 3} className="chart-axis-text y-axis">
-                ${Math.round(val / 1000).toLocaleString()}k
+              <text x={paddingLeft - 10} y={y + 4} className="chart-axis-text y-axis">
+                ${Math.round(val).toLocaleString()}
               </text>
             </g>
           )
@@ -85,15 +84,29 @@ export default function CumulativeAreaChart({ forecastData }) {
 
         <line x1={paddingLeft} y1={paddingTop + chartHeight} x2={svgWidth - paddingRight} y2={paddingTop + chartHeight} className="chart-axis-line" />
 
+        {/* Tracker Crosshair */}
+        {activeCumTooltip && (
+          <line
+            x1={activeCumTooltip.x}
+            y1={paddingTop}
+            x2={activeCumTooltip.x}
+            y2={paddingTop + chartHeight}
+            stroke="rgba(139, 92, 246, 0.35)"
+            strokeDasharray="4 4"
+            strokeWidth="1.5"
+            style={{ pointerEvents: 'none' }}
+          />
+        )}
+
         {/* Area & Line */}
-        {cumulativeData.length > 1 && <path d={areaPath} fill="url(#cum-gradient)" />}
-        <path d={linePath} fill="none" stroke="#8b5cf6" strokeWidth="2" />
+        {cumulativeData.length > 1 && <path d={areaPath} fill="url(#cum-gradient)" className="chart-area-draw" style={{ animation: 'fadeIn 1s ease forwards' }} />}
+        <path d={linePath} fill="none" stroke="#8b5cf6" strokeWidth="3" strokeLinecap="round" strokeDasharray="1000" strokeDashoffset="1000" style={{ animation: 'drawLine 1.8s cubic-bezier(0.16, 1, 0.3, 1) forwards' }} />
 
         {/* Labels */}
         {points.map((p, idx) => {
           if (idx % labelInterval === 0 || idx === points.length - 1) {
             return (
-              <text key={idx} x={p.x} y={paddingTop + chartHeight + 16} className="chart-axis-text x-axis">
+              <text key={idx} x={p.x} y={paddingTop + chartHeight + 20} className="chart-axis-text x-axis">
                 {p.date.substring(5)}
               </text>
             )
@@ -107,11 +120,11 @@ export default function CumulativeAreaChart({ forecastData }) {
             key={idx}
             cx={p.x}
             cy={p.y}
-            r={idx === points.length - 1 ? 5 : 2}
-            fill={idx === points.length - 1 ? '#8b5cf6' : '#ffffff'}
+            r={idx === points.length - 1 ? 6 : 4}
+            fill={idx === points.length - 1 ? '#8b5cf6' : '#030712'}
             stroke="#8b5cf6"
-            strokeWidth="1.5"
-            style={{ cursor: 'pointer' }}
+            strokeWidth="2.5"
+            style={{ cursor: 'pointer', transition: 'r 0.2s ease, fill 0.2s ease' }}
             onMouseEnter={() => {
               setActiveCumTooltip({
                 x: p.x,
@@ -129,11 +142,11 @@ export default function CumulativeAreaChart({ forecastData }) {
         <div 
           className="chart-tooltip"
           style={{ 
-            left: `${((activeCumTooltip.x - paddingLeft) / chartWidth) * 100 + 10}%`,
+            left: `${Math.max(5, Math.min(85, ((activeCumTooltip.x - paddingLeft) / chartWidth) * 100 + 4))}%`,
             top: `${((activeCumTooltip.y - paddingTop) / chartHeight) * 100 - 15}%` 
           }}
         >
-          <span className="tooltip-date">Cumulative ({activeCumTooltip.date})</span>
+          <span className="tooltip-date">Cumulative Revenue ({activeCumTooltip.date})</span>
           <span className="tooltip-sales">${activeCumTooltip.value.toLocaleString(undefined, { maximumFractionDigits: 2 })}</span>
         </div>
       )}

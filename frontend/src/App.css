@@ -1111,3 +1111,67 @@ body {
     transform: translateY(0);
   }
 }
+
+/* Stats Card Content Responsiveness */
+.stats-card-content-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 2rem;
+}
+
+@media (max-width: 900px) {
+  .stats-card-content-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
+
+/* AI Insights Panel Split Default */
+.insights-panel-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2.5rem;
+}
+
+@media (max-width: 900px) {
+  .insights-panel-split {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+}
+
+/* Extra Stretches for Hover and Click States */
+.kpi-card, .insight-item, .card {
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.4s ease, box-shadow 0.4s ease;
+}
+
+.insight-item:hover {
+  transform: translateY(-4px) scale(1.02);
+  border-color: rgba(139, 92, 246, 0.35);
+  box-shadow: 0 10px 25px rgba(139, 92, 246, 0.1);
+}
+
+.kpi-card:hover {
+  transform: translateY(-6px) scale(1.03);
+}
+
+/* Active buttons tactile feedback */
+.btn-predict:active,
+.btn-export:active,
+.btn-helper:active,
+.toast-close:active {
+  transform: scale(0.94) !important;
+  transition: transform 0.1s ease;
+}
+
+/* Stat item hover shifts */
+.stat-item {
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.3s ease, padding-left 0.3s ease;
+}
+
+.stat-item:hover {
+  transform: translateX(4px);
+  background-color: rgba(255, 255, 255, 0.02);
+  padding-left: 0.6rem;
+  border-radius: 6px;
+}

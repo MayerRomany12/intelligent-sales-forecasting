@@ -284,7 +284,7 @@ function App() {
                     {stats && (
                       <div className="card stats-card fade-in" style={{ padding: '2rem', animationDelay: '0.3s' }}>
                         <h2>{days}-Day Horizon Analysis</h2>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+                        <div className="stats-card-content-grid">
                           <div>
                             <div className="stats-list">
                               <div className="stat-item">
