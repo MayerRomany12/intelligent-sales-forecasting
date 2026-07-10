@@ -1,0 +1,31 @@
+# Ignore data/raw as it contains massive CSV files
+data/raw/
+
+# Ignore frontend folder entirely for the backend deployment
+frontend/
+
+# Ignore notebooks containing heavy visualization and cache files
+notebooks/
+
+# Ignore docs and reports
+docs/
+reports/
+
+# Ignore docker files and configurations
+docker-compose.yml
+.dockerignore
+**/Dockerfile
+nginx.conf
+render.yaml
+
+# Ignore local MLflow runs
+mlruns/
+mlflow.db
+
+# Ignore local python virtual environments and cache
+.venv/
+venv/
+env/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
