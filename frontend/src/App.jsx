@@ -9,7 +9,7 @@ function App() {
   const [error, setError] = useState(null)
 
   // Load API URL from env variables (Vite uses VITE_ prefix)
-  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+  const apiUrl = import.meta.env.VITE_API_URL || (window.location.hostname.includes('vercel.app') ? 'https://intelligent-sales-forecasting.vercel.app' : 'http://localhost:8000')
 
   const handlePredict = async (e) => {
     e.preventDefault()
