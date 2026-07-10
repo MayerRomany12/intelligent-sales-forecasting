@@ -37,21 +37,22 @@ export default function WeekdayDonutChart({ forecastData }) {
     const radius = 40
     const circumference = 2 * Math.PI * radius
 
-    // Filter out days with zero sales to avoid drawing empty slivers, but calculate percentage based on total
     let cumulativePercent = 0
 
     return stats.map((item, idx) => {
       const percent = totalSalesSum > 0 ? (item.total / totalSalesSum) * 100 : 0
       const strokeLength = (percent / 100) * circumference
-      // Shift stroke offset backward clockwise
-      const strokeOffset = circumference - (cumulativePercent / 100) * circumference
+      
+      // Calculate starting angle based on cumulative percentage. 
+      // Subtracting 90 degrees starts the donut drawing at 12 o'clock.
+      const angle = -90 + (cumulativePercent / 100) * 360
       cumulativePercent += percent
 
       return {
         ...item,
         percent,
         strokeLength,
-        strokeOffset,
+        angle,
         color: colors[idx],
         circumference,
         radius
@@ -77,7 +78,7 @@ export default function WeekdayDonutChart({ forecastData }) {
   return (
     <div className="chart-container-inner" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
       <div style={{ position: 'relative', width: '200px', height: '200px' }}>
-        <svg viewBox="0 0 120 120" style={{ width: '100%', height: '100%', transform: 'rotate(-90deg)' }}>
+        <svg viewBox="0 0 120 120" style={{ width: '100%', height: '100%' }}>
           {/* Base circle background hole */}
           <circle
             cx="60"
@@ -88,7 +89,7 @@ export default function WeekdayDonutChart({ forecastData }) {
             strokeWidth="10"
           />
 
-          {/* Draw segments */}
+          {/* Draw segments using rotation transform. No dashoffset math required! */}
           {donutData.map((seg, idx) => {
             if (seg.percent === 0) return null
             return (
@@ -101,7 +102,8 @@ export default function WeekdayDonutChart({ forecastData }) {
                 stroke={seg.color}
                 strokeWidth={hoveredSegment?.dayIndex === seg.dayIndex ? 12 : 10}
                 strokeDasharray={`${seg.strokeLength} ${seg.circumference}`}
-                strokeDashoffset={seg.strokeOffset}
+                strokeDashoffset="0"
+                transform={`rotate(${seg.angle} 60 60)`}
                 strokeLinecap="round"
                 style={{
                   transition: 'stroke-width 0.3s ease, filter 0.3s ease',
