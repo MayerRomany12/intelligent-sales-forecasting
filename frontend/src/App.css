@@ -940,10 +940,12 @@ body {
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border-top: 1px solid var(--panel-border);
-  border-radius: 24px 24px 0 0;
+  border-radius: 0;
   text-align: center;
   position: relative;
   overflow: hidden;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .footer-glow-line {
@@ -974,11 +976,20 @@ body {
 
 .team-grid {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: row;
+  flex-wrap: nowrap;
   justify-content: center;
-  gap: 1rem;
-  max-width: 800px;
+  align-items: center;
+  gap: 1.5rem;
+  max-width: 100%;
   margin: 0 auto 2rem auto;
+}
+
+@media (max-width: 900px) {
+  .team-grid {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
 }
 
 .team-member {
@@ -1004,6 +1015,33 @@ body {
 .footer-copy {
   font-size: 0.75rem;
   color: var(--text-muted);
+}
+
+/* AI Insights Panel Split Layout */
+@media (max-width: 1100px) {
+  .insights-panel-split {
+    grid-template-columns: 1fr !important;
+    gap: 2rem !important;
+  }
+}
+
+.rec-item {
+  border-left: 4px solid var(--accent-purple) !important;
+  transition: all 0.3s ease;
+}
+
+.rec-item:hover {
+  border-left-color: #00f2fe !important;
+  transform: translateX(4px) !important;
+}
+
+.rec-icon {
+  background: rgba(139, 92, 246, 0.1);
+  padding: 0.25rem 0.5rem;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* AI Insights Section */
