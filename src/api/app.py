@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 import datetime
 import os
-from src.predict import predict_sales_for_date, predict_sales_sequence
+from src.predict import predict_sales_for_date, predict_sales_sequence, load_prediction_model
 from fastapi.middleware.cors import CORSMiddleware
 import logging
 
@@ -13,6 +13,24 @@ logging.basicConfig(
     handlers=[logging.StreamHandler()]
 )
 logger = logging.getLogger("sales-api")
+
+# Pre-load model at startup
+global_model = None
+try:
+    model_path = os.getenv("MODEL_PATH", "Models/best_xgboost_model.json")
+    if not os.path.exists(model_path):
+        if os.path.exists("models/best_xgboost_model.json"):
+            model_path = "models/best_xgboost_model.json"
+        elif os.path.exists("Models/best_xgboost_model.json"):
+            model_path = "Models/best_xgboost_model.json"
+            
+    if os.path.exists(model_path):
+        global_model = load_prediction_model(model_path)
+        logger.info(f"Loaded XGBoost model successfully from {model_path}")
+    else:
+        logger.warning(f"XGBoost model file not found at {model_path} during startup.")
+except Exception as e:
+    logger.error(f"Error loading model at startup: {e}")
 
 app = FastAPI(
     title="Sales Forecasting API",
@@ -75,13 +93,26 @@ def read_root():
 @app.get("/health")
 def health_check():
     """Simple endpoint to verify server health and model availability."""
+    global global_model
+    if global_model is not None:
+        return {"status": "healthy", "model_loaded": True}
+        
     model_path = os.getenv("MODEL_PATH", "Models/best_xgboost_model.json")
     model_exists = os.path.exists(model_path)
     if not model_exists:
         model_exists = os.path.exists("models/best_xgboost_model.json") or os.path.exists("Models/best_xgboost_model.json")
         
     if model_exists:
-        return {"status": "healthy", "model_loaded": True}
+        try:
+            if not os.path.exists(model_path):
+                if os.path.exists("models/best_xgboost_model.json"):
+                    model_path = "models/best_xgboost_model.json"
+                elif os.path.exists("Models/best_xgboost_model.json"):
+                    model_path = "Models/best_xgboost_model.json"
+            global_model = load_prediction_model(model_path)
+            return {"status": "healthy", "model_loaded": True}
+        except Exception as e:
+            return {"status": "degraded", "detail": f"Failed to load model: {str(e)}", "model_loaded": False}
     else:
         return {"status": "degraded", "detail": "Trained model not found at path.", "model_loaded": False}
 
@@ -97,7 +128,7 @@ def predict_sales(request: SinglePredictionRequest):
             elif os.path.exists("Models/best_xgboost_model.json"):
                 model_path = "Models/best_xgboost_model.json"
             
-        prediction = predict_sales_for_date(request.date, model_path=model_path)
+        prediction = predict_sales_for_date(request.date, model_path=model_path, model=global_model)
         return {
             "date": request.date,
             "forecasted_sales": round(prediction, 2)
@@ -117,7 +148,7 @@ def predict_sequence(request: SequencePredictionRequest):
             elif os.path.exists("Models/best_xgboost_model.json"):
                 model_path = "Models/best_xgboost_model.json"
             
-        predictions = predict_sales_sequence(request.start_date, days=request.days, model_path=model_path)
+        predictions = predict_sales_sequence(request.start_date, days=request.days, model_path=model_path, model=global_model)
         # Round predictions
         for pred in predictions:
             pred["forecasted_sales"] = round(pred["forecasted_sales"], 2)

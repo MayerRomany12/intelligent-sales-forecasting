@@ -4,8 +4,17 @@ import numpy as np
 import xgboost as xgb
 import holidays
 
-def load_prediction_model(model_path="models/best_xgboost_model.json"):
+# Global cache for holidays to avoid re-creation in the recursive loop
+_holidays_cache = {}
 
+def get_cached_holidays(country, years):
+    years_tuple = tuple(sorted(years))
+    cache_key = (country, years_tuple)
+    if cache_key not in _holidays_cache:
+        _holidays_cache[cache_key] = holidays.country_holidays(country, years=list(years))
+    return _holidays_cache[cache_key]
+
+def load_prediction_model(model_path="models/best_xgboost_model.json"):
     """Loads the trained XGBoost model from the local path."""
     if not os.path.exists(model_path):
         raise FileNotFoundError(f"Trained model not found at {model_path}. Please run train.py first.")
@@ -28,13 +37,23 @@ def prepare_features_for_date(target_date_str, history_path="data/processed/time
     else:
         df_history = df_history.copy()
         
+    # Slice history up to the target date to ensure we only look at past/current data relative to target
+    df_past = df_history[df_history.index <= target_date]
+    if df_past.empty:
+        df_past = df_history.head(1)
+        
+    # To optimize, we only need the tail of history to calculate lags and rolling windows.
+    # Max lag is 30, max rolling window is 30. We keep the last 40 rows to be safe.
+    if df_past.shape[0] > 40:
+        df_past = df_past.tail(40)
+        
     # If the target date is not in history, append a dummy row for it to calculate features
-    if target_date not in df_history.index:
+    if target_date not in df_past.index:
         df_target = pd.DataFrame(index=[target_date], columns=['total_sales', 'total_items', 'total_orders'])
         df_target.fillna(0.0, inplace=True)
-        df_combined = pd.concat([df_history, df_target]).sort_index()
+        df_combined = pd.concat([df_past, df_target]).sort_index()
     else:
-        df_combined = df_history.copy()
+        df_combined = df_past.copy()
         
     # Calculate features on the combined dataset
     # 1. Time features
@@ -45,7 +64,7 @@ def prepare_features_for_date(target_date_str, history_path="data/processed/time
     
     # 2. Holiday flags
     years = df_combined.index.year.unique().tolist()
-    country_holidays = holidays.country_holidays(country, years=years)
+    country_holidays = get_cached_holidays(country, years)
     df_combined['is_holiday'] = df_combined.index.map(lambda x: x in country_holidays).astype(int)
     
     # 3. Lag features (based on total_sales)
@@ -63,11 +82,44 @@ def prepare_features_for_date(target_date_str, history_path="data/processed/time
     feature_cols = [col for col in df_target.columns if col not in ['total_sales', 'total_items', 'total_orders']]
     return df_target[feature_cols]
 
-def predict_sales_for_date(target_date_str, model_path="models/best_xgboost_model.json", history_path="data/processed/time_series_sales.csv", df_history=None):
+def predict_sales_for_date(target_date_str, model_path="models/best_xgboost_model.json", history_path="data/processed/time_series_sales.csv", df_history=None, model=None):
     """Loads the model, prepares features for the target date, and makes a prediction."""
-    model = load_prediction_model(model_path)
-    features = prepare_features_for_date(target_date_str, history_path=history_path, df_history=df_history)
+    if model is None:
+        model = load_prediction_model(model_path)
+        
+    target_date = pd.to_datetime(target_date_str)
     
+    # Load base history if not provided
+    if df_history is None:
+        df_history = pd.read_csv(history_path, parse_dates=['order_purchase_timestamp'], index_col='order_purchase_timestamp')
+        df_history = df_history.sort_index()
+    else:
+        df_history = df_history.copy()
+        
+    history_max = df_history.index.max()
+    
+    # If target_date is after the end of history, we recursively predict intermediate dates
+    if target_date > history_max:
+        current_date = history_max + pd.Timedelta(days=1)
+        while current_date < target_date:
+            current_date_str = current_date.strftime("%Y-%m-%d")
+            # Predict recursively using the current df_history
+            pred_val = predict_sales_for_date(
+                current_date_str, 
+                model_path=model_path, 
+                df_history=df_history, 
+                model=model
+            )
+            # Append predicted row to df_history
+            new_row = pd.DataFrame([[pred_val, 0.0, 0.0]], columns=['total_sales', 'total_items', 'total_orders'], index=[current_date])
+            df_history = pd.concat([df_history, new_row]).sort_index()
+            current_date += pd.Timedelta(days=1)
+            
+        # Once intermediate dates are filled, predict the final target date
+        features = prepare_features_for_date(target_date_str, df_history=df_history)
+    else:
+        features = prepare_features_for_date(target_date_str, df_history=df_history)
+        
     # Align features column order with the trained model's feature names
     trained_features = model.get_booster().feature_names
     if trained_features:
@@ -76,23 +128,54 @@ def predict_sales_for_date(target_date_str, model_path="models/best_xgboost_mode
     prediction = model.predict(features)[0]
     return max(0.0, float(prediction)) # Ensure non-negative sales
 
-def predict_sales_sequence(start_date_str, days=7, model_path="models/best_xgboost_model.json", history_path="data/processed/time_series_sales.csv"):
+def predict_sales_sequence(start_date_str, days=7, model_path="models/best_xgboost_model.json", history_path="data/processed/time_series_sales.csv", model=None):
     """
     Predicts sales for a sequence of consecutive days starting from start_date_str,
     using recursive forecasting (each prediction is appended to the history for subsequent steps).
     """
+    if model is None:
+        model = load_prediction_model(model_path)
+        
     start_date = pd.to_datetime(start_date_str)
     
     # Load base history
     df_history = pd.read_csv(history_path, parse_dates=['order_purchase_timestamp'], index_col='order_purchase_timestamp')
     df_history = df_history.sort_index()
     
+    history_max = df_history.index.max()
+    
+    # 1. If start_date is in the future (after history_max), 
+    # we need to recursively predict/fill intermediate days from history_max + 1 day to start_date - 1 day.
+    if start_date > history_max + pd.Timedelta(days=1):
+        # We need to fill up to start_date - 1 day
+        fill_end_date = start_date - pd.Timedelta(days=1)
+        current_date = history_max + pd.Timedelta(days=1)
+        
+        while current_date <= fill_end_date:
+            current_date_str = current_date.strftime("%Y-%m-%d")
+            pred_val = predict_sales_for_date(
+                current_date_str, 
+                model_path=model_path, 
+                df_history=df_history, 
+                model=model
+            )
+            new_row = pd.DataFrame([[pred_val, 0.0, 0.0]], columns=['total_sales', 'total_items', 'total_orders'], index=[current_date])
+            df_history = pd.concat([df_history, new_row]).sort_index()
+            current_date += pd.Timedelta(days=1)
+            
+    # Now, whether start_date was in the future or not, df_history has consecutive days up to start_date - 1 day.
+    # 2. Predict the requested sequence (starting from start_date, for `days` days).
     predictions = []
     current_date = start_date
     
     for _ in range(days):
         date_str = current_date.strftime("%Y-%m-%d")
-        pred_val = predict_sales_for_date(date_str, model_path=model_path, df_history=df_history)
+        pred_val = predict_sales_for_date(
+            date_str, 
+            model_path=model_path, 
+            df_history=df_history, 
+            model=model
+        )
         
         predictions.append({
             "date": date_str,
@@ -100,7 +183,7 @@ def predict_sales_sequence(start_date_str, days=7, model_path="models/best_xgboo
         })
         
         # Append the predicted sales to history so it propagates to lag/rolling features
-        new_row = pd.DataFrame([[pred_val, 0, 0]], columns=['total_sales', 'total_items', 'total_orders'], index=[current_date])
+        new_row = pd.DataFrame([[pred_val, 0.0, 0.0]], columns=['total_sales', 'total_items', 'total_orders'], index=[current_date])
         df_history = pd.concat([df_history, new_row]).sort_index()
         
         current_date += pd.Timedelta(days=1)
