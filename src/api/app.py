@@ -83,6 +83,7 @@ def validate_date_str(date_str: str):
 def read_root():
     return {
         "message": "Welcome to the Sales Forecasting API!",
+        "version": "1.1.0-recursive",
         "endpoints": {
             "/health": "GET - Check API status",
             "/predict": "POST - Predict sales for a single date",
