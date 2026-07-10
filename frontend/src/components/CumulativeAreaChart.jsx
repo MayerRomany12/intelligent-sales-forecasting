@@ -115,27 +115,31 @@ export default function CumulativeAreaChart({ forecastData }) {
         })}
 
         {/* Target Nodes */}
-        {points.map((p, idx) => (
-          <circle
-            key={idx}
-            cx={p.x}
-            cy={p.y}
-            r={idx === points.length - 1 ? 6 : 4}
-            fill={idx === points.length - 1 ? '#8b5cf6' : '#030712'}
-            stroke="#8b5cf6"
-            strokeWidth="2.5"
-            style={{ cursor: 'pointer', transition: 'r 0.2s ease, fill 0.2s ease' }}
-            onMouseEnter={() => {
-              setActiveCumTooltip({
-                x: p.x,
-                y: p.y - 10,
-                date: p.date,
-                value: p.value
-              })
-            }}
-            onMouseLeave={() => setActiveCumTooltip(null)}
-          />
-        ))}
+        {points.map((p, idx) => {
+          const isDense = cumulativeData.length > 30;
+          const rSize = idx === points.length - 1 ? (isDense ? 4.5 : 6) : (isDense ? 1.5 : 4);
+          return (
+            <circle
+              key={idx}
+              cx={p.x}
+              cy={p.y}
+              r={rSize}
+              fill={idx === points.length - 1 ? '#8b5cf6' : '#030712'}
+              stroke="#8b5cf6"
+              strokeWidth="2.5"
+              style={{ cursor: 'pointer', transition: 'r 0.2s ease, fill 0.2s ease' }}
+              onMouseEnter={() => {
+                setActiveCumTooltip({
+                  x: p.x,
+                  y: p.y - 10,
+                  date: p.date,
+                  value: p.value
+                })
+              }}
+              onMouseLeave={() => setActiveCumTooltip(null)}
+            />
+          )
+        })}
       </svg>
 
       {activeCumTooltip && (

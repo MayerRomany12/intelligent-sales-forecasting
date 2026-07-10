@@ -34,8 +34,11 @@ export default function WeekdayDonutChart({ forecastData }) {
 
     const totalSalesSum = stats.reduce((acc, curr) => acc + curr.total, 0)
 
+    const radius = 40
+    const circumference = 2 * Math.PI * radius
+
+    // Filter out days with zero sales to avoid drawing empty slivers, but calculate percentage based on total
     let cumulativePercent = 0
-    const circumference = 314.159 // 2 * pi * r (where r = 50)
 
     return stats.map((item, idx) => {
       const percent = totalSalesSum > 0 ? (item.total / totalSalesSum) * 100 : 0
@@ -49,7 +52,9 @@ export default function WeekdayDonutChart({ forecastData }) {
         percent,
         strokeLength,
         strokeOffset,
-        color: colors[idx]
+        color: colors[idx],
+        circumference,
+        radius
       }
     })
   }, [forecastData])
@@ -77,7 +82,7 @@ export default function WeekdayDonutChart({ forecastData }) {
           <circle
             cx="60"
             cy="60"
-            r="50"
+            r="40"
             fill="none"
             stroke="rgba(255, 255, 255, 0.02)"
             strokeWidth="10"
@@ -91,11 +96,11 @@ export default function WeekdayDonutChart({ forecastData }) {
                 key={idx}
                 cx="60"
                 cy="60"
-                r="50"
+                r="40"
                 fill="none"
                 stroke={seg.color}
                 strokeWidth={hoveredSegment?.dayIndex === seg.dayIndex ? 12 : 10}
-                strokeDasharray={`${seg.strokeLength} 314.159`}
+                strokeDasharray={`${seg.strokeLength} ${seg.circumference}`}
                 strokeDashoffset={seg.strokeOffset}
                 strokeLinecap="round"
                 style={{

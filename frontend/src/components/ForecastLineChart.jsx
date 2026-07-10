@@ -113,24 +113,28 @@ export default function ForecastLineChart({ forecastData }) {
         })}
 
         {/* Interactive nodes */}
-        {points.map((p, idx) => (
-          <circle
-            key={idx}
-            cx={p.x}
-            cy={p.y}
-            r={idx === 0 ? 6 : 4}
-            className={idx === 0 ? 'chart-prediction-point' : 'chart-node'}
-            onMouseEnter={() => {
-              setActiveTooltip({
-                x: p.x,
-                y: p.y - 10,
-                date: p.date,
-                sales: p.sales
-              })
-            }}
-            onMouseLeave={() => setActiveTooltip(null)}
-          />
-        ))}
+        {points.map((p, idx) => {
+          const isDense = forecastData.length > 30;
+          const rSize = idx === 0 ? (isDense ? 4.5 : 6) : (isDense ? 1.5 : 4);
+          return (
+            <circle
+              key={idx}
+              cx={p.x}
+              cy={p.y}
+              r={rSize}
+              className={idx === 0 ? 'chart-prediction-point' : 'chart-node'}
+              onMouseEnter={() => {
+                setActiveTooltip({
+                  x: p.x,
+                  y: p.y - 10,
+                  date: p.date,
+                  sales: p.sales
+                })
+              }}
+              onMouseLeave={() => setActiveTooltip(null)}
+            />
+          )
+        })}
       </svg>
 
       {activeTooltip && (
