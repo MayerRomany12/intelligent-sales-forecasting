@@ -120,6 +120,10 @@ function App() {
 
   return (
     <div className="container">
+      {/* Floating Background Glows */}
+      <div className="bg-glow-1"></div>
+      <div className="bg-glow-2"></div>
+
       {/* Toast Notifications */}
       <div className="toast-container">
         {toasts.map(toast => (
@@ -406,6 +410,23 @@ function App() {
 
         </div>
       </div>
+
+      {/* Team Footer Section */}
+      <footer className="footer fade-in" style={{ animationDelay: '0.6s' }}>
+        <div className="footer-content">
+          <div className="footer-glow-line"></div>
+          <p className="footer-title">🧠 Olist Sales Forecasting Engine</p>
+          <p className="footer-team-heading">Project Developed By:</p>
+          <div className="team-grid">
+            <span className="team-member">Mayer Romany</span>
+            <span className="team-member">Khalid Mamdouh</span>
+            <span className="team-member">Mostafa Ayman</span>
+            <span className="team-member">Mohamed Osama</span>
+            <span className="team-member">Ibrahim Mohamed</span>
+          </div>
+          <p className="footer-copy">&copy; {new Date().getFullYear()} - Time Series Forecasting & Analytics Project</p>
+        </div>
+      </footer>
     </div>
   )
 }

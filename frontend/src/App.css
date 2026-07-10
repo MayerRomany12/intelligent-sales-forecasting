@@ -88,11 +88,13 @@ body {
   padding: 2rem;
   box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.7);
   box-sizing: border-box;
-  transition: transform 0.3s ease, border-color 0.3s ease;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s ease, box-shadow 0.4s ease;
 }
 
 .card:hover {
-  border-color: rgba(255, 255, 255, 0.1);
+  transform: translateY(-5px);
+  border-color: rgba(0, 242, 254, 0.2);
+  box-shadow: 0 20px 40px -10px rgba(0, 242, 254, 0.08), 0 0 15px rgba(0, 242, 254, 0.03);
 }
 
 .card h2 {
@@ -236,11 +238,18 @@ body {
   padding: 1.25rem 1.5rem;
   position: relative;
   overflow: hidden;
-  transition: transform 0.3s ease;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s ease, box-shadow 0.4s ease;
 }
 
 .kpi-card:hover {
-  transform: translateY(-2px);
+  transform: translateY(-5px);
+  border-color: rgba(139, 92, 246, 0.25);
+  box-shadow: 0 15px 30px -5px rgba(139, 92, 246, 0.08);
+}
+
+.kpi-card.predicted:hover {
+  border-color: rgba(0, 242, 254, 0.35);
+  box-shadow: 0 15px 30px -5px rgba(0, 242, 254, 0.12);
 }
 
 .kpi-label {
@@ -571,11 +580,12 @@ body {
 }
 
 .forecast-table tbody tr {
-  transition: background-color 0.2s ease;
+  transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
 .forecast-table tbody tr:hover {
-  background-color: rgba(255, 255, 255, 0.02);
+  background-color: rgba(255, 255, 255, 0.03);
+  transform: scale(1.006);
 }
 
 .forecast-table tbody tr:last-child td {
@@ -812,6 +822,188 @@ body {
 
 .comparison-bar-fill.purple {
   background: var(--accent-glow);
+}
+
+/* AI Insights Section */
+.ai-insights-card {
+  margin-top: 2rem;
+}
+
+.insights-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+@media (max-width: 768px) {
+  .insights-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.insight-item {
+  display: flex;
+  gap: 1rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 1.25rem;
+  transition: transform 0.3s ease, border-color 0.3s ease;
+}
+
+.insight-item:hover {
+  transform: translateY(-2px);
+  border-color: rgba(139, 92, 246, 0.25);
+  box-shadow: 0 5px 15px rgba(139, 92, 246, 0.05);
+}
+
+.insight-icon {
+  font-size: 1.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.insight-content h4 {
+  margin: 0 0 0.5rem 0;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+}
+
+.insight-content p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+/* Staggered Animations */
+.fade-in {
+  opacity: 0;
+  transform: translateY(15px);
+  animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideUpFade {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Floating Background Glows */
+.bg-glow-1, .bg-glow-2 {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(80px);
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.15;
+  animation: floatGlow 25s infinite alternate ease-in-out;
+}
+
+.bg-glow-1 {
+  width: 450px;
+  height: 450px;
+  background: radial-gradient(circle, rgba(0, 242, 254, 0.25) 0%, rgba(79, 172, 254, 0) 70%);
+  top: 15%;
+  left: -10%;
+}
+
+.bg-glow-2 {
+  width: 550px;
+  height: 550px;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.2) 0%, rgba(69, 104, 220, 0) 70%);
+  bottom: -10%;
+  right: -10%;
+  animation-delay: -7s;
+}
+
+@keyframes floatGlow {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(60px, 40px) scale(1.15);
+  }
+  100% {
+    transform: translate(-40px, 80px) scale(0.9);
+  }
+}
+
+/* Footer Credit Styling */
+.footer {
+  margin-top: 5rem;
+  padding: 3rem 1.5rem;
+  background: var(--panel-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid var(--panel-border);
+  border-radius: 24px 24px 0 0;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.footer-glow-line {
+  position: absolute;
+  top: 0;
+  left: 10%;
+  right: 10%;
+  height: 1.5px;
+  background: linear-gradient(90deg, transparent, var(--accent-purple), #00f2fe, transparent);
+  filter: drop-shadow(0 0 4px #00f2fe);
+}
+
+.footer-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.01em;
+}
+
+.footer-team-heading {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 1.25rem;
+}
+
+.team-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+  max-width: 800px;
+  margin: 0 auto 2rem auto;
+}
+
+.team-member {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 0.5rem 1.25rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  transition: all 0.3s ease;
+  cursor: default;
+}
+
+.team-member:hover {
+  background: rgba(0, 242, 254, 0.04);
+  border-color: rgba(0, 242, 254, 0.25);
+  color: #00f2fe;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 242, 254, 0.08);
+}
+
+.footer-copy {
+  font-size: 0.75rem;
+  color: var(--text-muted);
 }
 
 /* AI Insights Section */
